@@ -8,10 +8,17 @@ pipeline{
                 }
             }
         }
-        stage('tests_phase'){
+        stage('unit_tests'){
             steps{
                 sh '''
                 mvn test
+                '''
+            }
+        }
+        stage('static_code_analysis'){
+            steps{
+                sh '''
+                mvn clean package sonar:sonar
                 '''
             }
         }
