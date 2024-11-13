@@ -21,6 +21,7 @@ pipeline{
                     withSonarQubeEnv(credentialsId: 'sonarqube-api') {
                         sh 'mvn clean install sonar:sonar'
                     }
+                }
             }
         }
     }
