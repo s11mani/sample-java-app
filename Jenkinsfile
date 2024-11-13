@@ -8,5 +8,12 @@ pipeline{
                 }
             }
         }
+        stage('tests_phase'){
+            steps{
+                sh '''
+                mvn test
+                '''
+            }
+        }
     }
 }
