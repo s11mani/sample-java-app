@@ -10,32 +10,17 @@ pipeline {
         stage('git_checkout') {
             steps {
                 script {
-                    echo 'Checking out the repository...'
                     git branch: 'main', url: 'https://github.com/s11mani/sample-java-app.git'
-                    
-                    // Fetch commit ID and branch name using git commands
-                    echo 'Fetching commit ID and branch name...'
-                    def commitId = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
-                    def branchName = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
-
-                    // Debug: Print the values to ensure they are correct
-                    echo "Commit ID: ${commitId}"
-                    echo "Branch Name: ${branchName}"
-
-                    // Set the environment variables for the next stage
-                    env.COMMIT_ID = commitId
-                    env.BRANCH_NAME = branchName
-
-                    // Ensure the variables are not empty
-                    if (!env.BRANCH_NAME || !env.COMMIT_ID) {
-                        error "BRANCH_NAME or COMMIT_ID is empty, cannot proceed"
-                    }
+                    env.COMMIT_ID = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
+                    env.BRANCH_NAME = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
                 }
             }
         }
         stage('unit_tests') {
             steps {
-                sh 'mvn test'
+                sh '''
+                    mvn test
+                '''
             }
         }
         stage('static_code_analysis') {
@@ -56,27 +41,22 @@ pipeline {
         }
         stage('maven_build') {
             steps {
-                sh 'mvn clean install'
+                sh '''
+                    mvn clean install
+                '''
             }
         }
         stage('docker_login_build_push') {
             steps {
                 script {
-                    // Check if BRANCH_NAME and COMMIT_ID are not empty
-                    echo "Branch: ${env.BRANCH_NAME}, Commit ID: ${env.COMMIT_ID}"
-                    if (!env.BRANCH_NAME || !env.COMMIT_ID) {
-                        error "BRANCH_NAME or COMMIT_ID is empty, cannot proceed with Docker build"
-                    }
-                    
-                    echo "Logging into Docker..."
-                    sh "echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin"
-                    echo 'Login Completed'
-
-                    echo "Building and pushing Docker image..."
-                    sh "docker build -t ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${env.BRANCH_NAME}-${env.COMMIT_ID} ."
-                    sh "docker tag ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${env.BRANCH_NAME}-${env.COMMIT_ID} ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${env.BRANCH_NAME}-latest"
-                    sh "docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${env.BRANCH_NAME}-${env.COMMIT_ID}"
-                    sh "docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${env.BRANCH_NAME}-latest"
+                    sh '''
+                        echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin
+                        echo 'Login Completed'
+                        docker build -t ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} .
+                        docker tag ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
+                        docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID}
+                        docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
+                    '''
                 }
             }
         }
