@@ -49,11 +49,21 @@ pipeline {
         stage('docker_login_build_push') {
             steps {
                 script {
+                    // Ensure BRANCH_NAME and COMMIT_ID are not empty
+                    if (!env.BRANCH_NAME) {
+                        error "BRANCH_NAME is empty, cannot proceed with Docker build"
+                    }
+                    if (!env.COMMIT_ID) {
+                        error "COMMIT_ID is empty, cannot proceed with Docker build"
+                    }
+                    
                     sh '''
                     # Use bash explicitly for variable substitution
                     #!/bin/bash
                     echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin
                     echo 'Login Completed'
+                    
+                    # Ensure that both variables are included in the tag
                     docker build -t ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} .
                     docker tag ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
                     docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID}
