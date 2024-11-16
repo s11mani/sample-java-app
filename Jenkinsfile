@@ -3,6 +3,8 @@ pipeline {
     environment{
         DOCKERHUB_CREDENTIALS_PSW = credentials('dockerhub-password')
         DOCKERHUB_CREDENTIALS_USR = credentials('dockerhub-username')
+        COMMIT_HASH = sh(returnStdout: true, script: 'git rev-parse --short=30 HEAD').trim()
+        BRANCH_NAME = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
     }
     stages {
         stage('git_checkout') {
@@ -47,8 +49,8 @@ pipeline {
         stage('docker_login_build_push') {
             steps {
                 script{
-                    BRANCH_NAME = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
-                    COMMIT_ID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                    // BRANCH_NAME = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+                    // COMMIT_ID = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
                     sh'''
                     echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin
 	                echo 'Login Completed'
