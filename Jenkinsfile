@@ -52,10 +52,10 @@ pipeline {
                     sh'''
                     echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin
 	                echo 'Login Completed'
-                    docker build -t ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${env.BRANCH_NAME}-${env.COMMIT_ID} .
-                    docker tag ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${env.BRANCH_NAME}-${env.COMMIT_ID} ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${env.BRANCH_NAME}-latest
-                    docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${env.BRANCH_NAME}-${env.COMMIT_ID}
-                    docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${env.BRANCH_NAME}-latest
+                    docker build -t ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} .
+                    docker tag ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
+                    docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID}
+                    docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
                     '''
                 }
             }
