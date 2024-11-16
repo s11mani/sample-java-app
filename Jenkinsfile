@@ -48,11 +48,28 @@ pipeline {
             steps {
                 script {
                         sh '''
-                        echo "This is your COMMIT_ID, $COMMIT_ID"
                         echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin
                         echo 'Login Completed'
                         docker build -t ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} .
                         docker tag ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
+                        '''
+                }
+            }
+        }
+        stage('trivy_docker_image_scan') {
+            steps {
+                script{
+                    sh '''
+                    trivy image --severity CRITICAL,HIGH ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest > docker_image_vulnerability.txt
+                    '''
+                    archiveArtifacts artifacts: 'docker_image_vulnerability.txt', followSymlinks: false
+                }
+            }
+        }
+        stage('docker_push_image') {
+            steps {
+                script {
+                        sh '''
                         docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID}
                         docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
                         '''
