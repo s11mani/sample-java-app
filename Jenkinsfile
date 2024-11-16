@@ -1,5 +1,9 @@
 pipeline {
     agent any
+    environment{
+        DOCKERHUB_CREDENTIALS_PSW = 'dockerhub-password'
+        DOCKERHUB_CREDENTIALS_USR = 'dockerhub-username'
+    }
     stages {
         stage('git_checkout') {
             steps {
@@ -35,6 +39,14 @@ pipeline {
             steps {
                 sh '''
                 mvn clean install
+                '''
+            }
+        }
+        stage('docker_login_build_push') {
+            steps {
+                sh '''
+                echo ${DOCKERHUB_CREDENTIALS_PSW} | sudo docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin
+	            echo 'Login Completed'
                 '''
             }
         }
