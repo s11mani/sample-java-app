@@ -1,8 +1,8 @@
 pipeline {
     agent any
     environment{
-        DOCKERHUB_CREDENTIALS_PSW = 'dockerhub-password'
-        DOCKERHUB_CREDENTIALS_USR = 'dockerhub-username'
+        DOCKERHUB_CREDENTIALS_PSW = credentials('dockerhub-password')
+        DOCKERHUB_CREDENTIALS_USR = credentials('dockerhub-username')
     }
     stages {
         stage('git_checkout') {
