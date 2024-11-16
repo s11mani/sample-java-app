@@ -13,6 +13,8 @@ pipeline {
                     git branch: 'main', url: 'https://github.com/s11mani/sample-java-app.git'
                     COMMIT_ID = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
                     BRANCH_NAME = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+                    echo "Branch Name: ${BRANCH_NAME}"
+                    echo "Commit ID: ${COMMIT_ID}"
                 }
             }
         }
