@@ -49,14 +49,16 @@ pipeline {
         stage('docker_login_build_push') {
             steps {
                 script {
-                    sh '''
+                    withEnv(["BRANCH_NAME=${env.BRANCH_NAME}", "COMMIT_ID=${env.COMMIT_ID}"]) {
+                        sh '''
                         echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin
                         echo 'Login Completed'
                         docker build -t ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} .
                         docker tag ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
                         docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID}
                         docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
-                    '''
+                        '''
+                    }
                 }
             }
         }
