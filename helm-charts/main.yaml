@@ -1,0 +1,11 @@
+namespace: default
+deploymentname: java-17-helloworld
+containerport: 8094
+replicaCount: 2
+image:
+  repository: "s11mani/"
+  tag: "main-781543348b62b2ab48db1150fc298d8a458c5fa2"
+service:
+  type: NodePort
+  port: 80
+  nodeport: 30070
