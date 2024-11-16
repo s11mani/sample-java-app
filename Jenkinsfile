@@ -3,7 +3,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS_PSW = credentials('dockerhub-password')
         DOCKERHUB_CREDENTIALS_USR = credentials('dockerhub-username')
-        // Declare variables globally so they are accessible in all stages
+        // Declare variables globally
         BRANCH_NAME = ''
         COMMIT_ID = ''
     }
@@ -11,20 +11,23 @@ pipeline {
         stage('git_checkout') {
             steps {
                 script {
-                    // Checkout the repository
                     echo 'Checking out the repository...'
                     git branch: 'main', url: 'https://github.com/s11mani/sample-java-app.git'
-
-                    // Fetch the commit ID and branch name and set them as environment variables
+                    
+                    // Fetch the commit ID and branch name
                     echo 'Fetching commit ID and branch name...'
-                    env.COMMIT_ID = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
-                    env.BRANCH_NAME = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+                    def commitId = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
+                    def branchName = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+
+                    // Set them as environment variables for later stages
+                    env.COMMIT_ID = commitId
+                    env.BRANCH_NAME = branchName
 
                     // Debug: Print the values to ensure they are correct
                     echo "Commit ID: ${env.COMMIT_ID}"
                     echo "Branch Name: ${env.BRANCH_NAME}"
 
-                    // Ensure default values if the variables are empty
+                    // Ensure the variables are not empty
                     if (!env.BRANCH_NAME || !env.COMMIT_ID) {
                         error "BRANCH_NAME or COMMIT_ID is empty, cannot proceed"
                     }
@@ -60,7 +63,7 @@ pipeline {
         stage('docker_login_build_push') {
             steps {
                 script {
-                    // Ensure BRANCH_NAME and COMMIT_ID are not empty before proceeding
+                    // Check again if the environment variables are set correctly before proceeding with Docker
                     if (!env.BRANCH_NAME || !env.COMMIT_ID) {
                         error "BRANCH_NAME or COMMIT_ID is empty, cannot proceed with Docker build"
                     }
