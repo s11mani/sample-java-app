@@ -3,7 +3,6 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS_PSW = credentials('dockerhub-password')
         DOCKERHUB_CREDENTIALS_USR = credentials('dockerhub-username')
-        // Declare variables globally
         BRANCH_NAME = ''
         COMMIT_ID = ''
     }
@@ -16,12 +15,8 @@ pipeline {
                     
                     // Fetch the commit ID and branch name
                     echo 'Fetching commit ID and branch name...'
-                    def commitId = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
-                    def branchName = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
-
-                    // Set them as environment variables for later stages
-                    env.COMMIT_ID = commitId
-                    env.BRANCH_NAME = branchName
+                    env.COMMIT_ID = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
+                    env.BRANCH_NAME = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
 
                     // Debug: Print the values to ensure they are correct
                     echo "Commit ID: ${env.COMMIT_ID}"
@@ -62,25 +57,23 @@ pipeline {
         }
         stage('docker_login_build_push') {
             steps {
-                script {
-                    // Check again if the environment variables are set correctly before proceeding with Docker
-                    if (!env.BRANCH_NAME || !env.COMMIT_ID) {
-                        error "BRANCH_NAME or COMMIT_ID is empty, cannot proceed with Docker build"
-                    }
+                // Check if the environment variables are not empty before proceeding with Docker build
+                sh '''
+                if [ -z "${BRANCH_NAME}" ] || [ -z "${COMMIT_ID}" ]; then
+                    echo "BRANCH_NAME or COMMIT_ID is empty, cannot proceed with Docker build"
+                    exit 1
+                fi
+                
+                echo "Logging into Docker..."
+                echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin
+                echo 'Login Completed'
 
-                    echo "Proceeding with Docker build using ${env.BRANCH_NAME} and ${env.COMMIT_ID}"
-
-                    // Docker login and build
-                    sh '''
-                    echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin
-                    echo 'Login Completed'
-
-                    docker build -t ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} .
-                    docker tag ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
-                    docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID}
-                    docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
-                    '''
-                }
+                echo "Building and pushing Docker image..."
+                docker build -t ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} .
+                docker tag ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
+                docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID}
+                docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
+                '''
             }
         }
     }
