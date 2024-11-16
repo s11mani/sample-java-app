@@ -61,11 +61,13 @@ pipeline {
         }
         stage('docker_login_build_push') {
             steps {
-                // Check if the environment variables are not empty before proceeding with Docker build
                 script {
+                    // Check if BRANCH_NAME and COMMIT_ID are not empty
+                    echo "Branch: ${env.BRANCH_NAME}, Commit ID: ${env.COMMIT_ID}"
                     if (!env.BRANCH_NAME || !env.COMMIT_ID) {
                         error "BRANCH_NAME or COMMIT_ID is empty, cannot proceed with Docker build"
                     }
+                    
                     echo "Logging into Docker..."
                     sh "echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin"
                     echo 'Login Completed'
