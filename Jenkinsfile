@@ -11,15 +11,25 @@ pipeline {
             steps {
                 script {
                     // Checkout the main branch
+                    echo 'Checking out the repository...'
                     git branch: 'main', url: 'https://github.com/s11mani/sample-java-app.git'
                     
-                    // Set commit ID and branch name
+                    // Debug: Check the current state of the repository
+                    sh 'git status'
+                    
+                    // Get the commit ID and branch name
+                    echo 'Fetching commit ID and branch name...'
                     env.COMMIT_ID = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
                     env.BRANCH_NAME = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
 
-                    // Print branch and commit ID to help debug
-                    echo "Branch Name: ${env.BRANCH_NAME}"
+                    // Debug: Print the values to ensure they are correct
                     echo "Commit ID: ${env.COMMIT_ID}"
+                    echo "Branch Name: ${env.BRANCH_NAME}"
+
+                    // Ensure default values if the variables are empty
+                    if (!env.BRANCH_NAME || !env.COMMIT_ID) {
+                        error "BRANCH_NAME or COMMIT_ID is empty, cannot proceed"
+                    }
                 }
             }
         }
@@ -58,20 +68,17 @@ pipeline {
                     }
 
                     echo "Proceeding with Docker build using ${env.BRANCH_NAME} and ${env.COMMIT_ID}"
-                    
-                    // Log in to Docker
+
+                    // Docker login and build
                     sh '''
                     echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin
                     echo 'Login Completed'
+
+                    docker build -t ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} .
+                    docker tag ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
+                    docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID}
+                    docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
                     '''
-                    
-                    // Docker build, tag, and push
-                    sh """
-                    docker build -t ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${env.BRANCH_NAME}-${env.COMMIT_ID} .
-                    docker tag ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${env.BRANCH_NAME}-${env.COMMIT_ID} ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${env.BRANCH_NAME}-latest
-                    docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${env.BRANCH_NAME}-${env.COMMIT_ID}
-                    docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${env.BRANCH_NAME}-latest
-                    """
                 }
             }
         }
