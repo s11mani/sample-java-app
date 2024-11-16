@@ -3,16 +3,16 @@ pipeline {
     environment{
         DOCKERHUB_CREDENTIALS_PSW = credentials('dockerhub-password')
         DOCKERHUB_CREDENTIALS_USR = credentials('dockerhub-username')
-        COMMIT_HASH = sh(returnStdout: true, script: 'git rev-parse --short=30 HEAD').trim()
-        BRANCH_NAME = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+        // COMMIT_HASH = sh(returnStdout: true, script: 'git rev-parse --short=30 HEAD').trim()
+        // BRANCH_NAME = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
     }
     stages {
         stage('git_checkout') {
             steps {
                 script {
                     git branch: 'main', url: 'https://github.com/s11mani/sample-java-app.git'
-                    // COMMIT_ID = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-                    // BRANCH_NAME = sh(returnStdout: true, script: 'git rev-parse --abbrev-ref HEAD').trim()
+                    COMMIT_ID = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
+                    BRANCH_NAME = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
                 }
             }
         }
@@ -55,7 +55,7 @@ pipeline {
                     echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin
 	                echo 'Login Completed'
                     docker build -t ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} .
-                    docker tag ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest .
+                    docker tag ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
                     docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID}
                     docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
                     '''
