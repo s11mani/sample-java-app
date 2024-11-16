@@ -3,6 +3,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS_PSW = credentials('dockerhub-password')
         DOCKERHUB_CREDENTIALS_USR = credentials('dockerhub-username')
+        // Declare variables globally so they are accessible in all stages
         BRANCH_NAME = ''
         COMMIT_ID = ''
     }
@@ -10,14 +11,11 @@ pipeline {
         stage('git_checkout') {
             steps {
                 script {
-                    // Checkout the main branch
+                    // Checkout the repository
                     echo 'Checking out the repository...'
                     git branch: 'main', url: 'https://github.com/s11mani/sample-java-app.git'
-                    
-                    // Debug: Check the current state of the repository
-                    sh 'git status'
-                    
-                    // Get the commit ID and branch name
+
+                    // Fetch the commit ID and branch name and set them as environment variables
                     echo 'Fetching commit ID and branch name...'
                     env.COMMIT_ID = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
                     env.BRANCH_NAME = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
@@ -62,7 +60,7 @@ pipeline {
         stage('docker_login_build_push') {
             steps {
                 script {
-                    // Ensure BRANCH_NAME and COMMIT_ID are not empty
+                    // Ensure BRANCH_NAME and COMMIT_ID are not empty before proceeding
                     if (!env.BRANCH_NAME || !env.COMMIT_ID) {
                         error "BRANCH_NAME or COMMIT_ID is empty, cannot proceed with Docker build"
                     }
