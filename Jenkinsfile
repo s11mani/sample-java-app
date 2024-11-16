@@ -3,8 +3,6 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS_PSW = credentials('dockerhub-password')
         DOCKERHUB_CREDENTIALS_USR = credentials('dockerhub-username')
-        // BRANCH_NAME = ''
-        // COMMIT_ID = ''
     }
     stages {
         stage('git_checkout') {
@@ -59,6 +57,14 @@ pipeline {
                         docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
                         '''
                 }
+            }
+        }
+        stage('docker_clean_images') {
+            steps {
+                sh '''
+                    docker rmi -f ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID}
+                    docker rmi -f ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
+                '''
             }
         }
     }
