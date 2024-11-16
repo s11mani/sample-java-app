@@ -3,8 +3,8 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS_PSW = credentials('dockerhub-password')
         DOCKERHUB_CREDENTIALS_USR = credentials('dockerhub-username')
-        BRANCH_NAME = ''
-        COMMIT_ID = ''
+        // BRANCH_NAME = ''
+        // COMMIT_ID = ''
     }
     stages {
         stage('git_checkout') {
@@ -49,8 +49,8 @@ pipeline {
         stage('docker_login_build_push') {
             steps {
                 script {
-                    withEnv(["BRANCH_NAME=${env.BRANCH_NAME}", "COMMIT_ID=${env.COMMIT_ID}"]) {
                         sh '''
+                        echo "This is your COMMIT_ID, $COMMIT_ID"
                         echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin
                         echo 'Login Completed'
                         docker build -t ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} .
@@ -58,7 +58,6 @@ pipeline {
                         docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID}
                         docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
                         '''
-                    }
                 }
             }
         }
