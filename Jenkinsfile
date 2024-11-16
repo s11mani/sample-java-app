@@ -15,13 +15,17 @@ pipeline {
                     
                     // Fetch the commit ID and branch name
                     echo 'Fetching commit ID and branch name...'
-                    env.COMMIT_ID = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
-                    env.BRANCH_NAME = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+                    def commitId = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
+                    def branchName = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
 
                     // Debug: Print the values to ensure they are correct
-                    echo "Commit ID: ${env.COMMIT_ID}"
-                    echo "Branch Name: ${env.BRANCH_NAME}"
+                    echo "Commit ID: ${commitId}"
+                    echo "Branch Name: ${branchName}"
 
+                    // Set the environment variables for the next stage
+                    env.COMMIT_ID = commitId
+                    env.BRANCH_NAME = branchName
+                    
                     // Ensure the variables are not empty
                     if (!env.BRANCH_NAME || !env.COMMIT_ID) {
                         error "BRANCH_NAME or COMMIT_ID is empty, cannot proceed"
