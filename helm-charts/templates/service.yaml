@@ -13,6 +13,6 @@ spec:
     - port: {{ .Values.service.port | int }}
       targetPort: {{ .Values.containerport | int }}
       protocol: TCP
-      {{- if .Values.nodeport }}
+      {{- if .Values.service.nodeport }}
       nodePort: {{ .Values.service.nodeport | int }}
       {{- end }}
