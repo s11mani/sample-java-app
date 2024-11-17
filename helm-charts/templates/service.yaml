@@ -10,7 +10,9 @@ spec:
   selector:
     app: {{ .Values.deploymentname }}
   ports:
-    - port: {{ .Values.serviceport | int }}
+    - port: {{ .Values.service.port | int }}
       targetPort: {{ .Values.containerport | int }}
-      nodePort: {{ .Values.nodeport | int }}
       protocol: TCP
+      {{- if .Values.nodeport }}
+      nodePort: {{ .Values.service.nodeport | int }}
+      {{- end }}
