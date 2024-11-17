@@ -104,7 +104,6 @@ pipeline {
                     def pushSuccess = false
                     while (retries < maxRetries && !pushSuccess) {
                         try {
-                            // Add, commit, and push the updated values.yaml
                             sh '''
                             git add helm-charts/${BRANCH_NAME}.yaml
                             git commit -m "jenkins-bot update helm ${BRANCH_NAME}-${COMMIT_ID}"
@@ -114,10 +113,8 @@ pipeline {
                         } catch (Exception e) {
                             retries++
                             echo "Push failed, retrying... Attempt ${retries} of ${maxRetries}"
-                            // Fetch latest changes and try merging
-                            sh 'git fetch --all'
                             try {
-                                sh 'git merge origin/${BRANCH_NAME} --strategy-option=theirs' // Resolve conflicts in favor of remote changes
+                                sh 'git pull --rebase origin ${BRANCH_NAME}'
                             } catch (mergeError) {
                                 echo "Merge failed, retrying push after resolving conflict..."
                             }
