@@ -84,5 +84,27 @@ pipeline {
                 '''
             }
         }
+        stage('update_helm_values') {
+            steps {
+                sh '''
+                    sed -i "s|tag: \".*\"|tag: \"${BRANCH_NAME}-${COMMIT_ID}\"|" helm-charts/${BRANCH_NAME}.yaml
+                '''
+            }
+        }
+        // stage('argo_deploy') {
+        //     steps {
+        //         script {
+        //             sh '''
+        //             git config user.name "jenkins-bot"
+        //             git config user.email "jenkins@example.com"
+        //             '''
+        //             sh '''
+        //             git add helm/values.yaml
+        //             git commit -m "Update image tag to ${IMAGE_TAG}"
+        //             git push origin ${BRANCH}
+        //             '''
+        //         }
+        //     }
+        // }
     }
 }
