@@ -51,8 +51,8 @@ pipeline {
                         sh '''
                         echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin
                         echo 'Login Completed'
-                        docker build -t ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} .
-                        docker tag ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID} ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
+                        docker build -t ${DOCKERHUB_CREDENTIALS_USR}/spring-petclinic:${BRANCH_NAME}-${COMMIT_ID} .
+                        docker tag ${DOCKERHUB_CREDENTIALS_USR}/spring-petclinic:${BRANCH_NAME}-${COMMIT_ID} ${DOCKERHUB_CREDENTIALS_USR}/spring-petclinic:${BRANCH_NAME}-latest
                         '''
                 }
             }
@@ -61,7 +61,7 @@ pipeline {
             steps {
                 script{
                     sh '''
-                    trivy image --format table --severity CRITICAL,HIGH ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest > docker_image_vulnerability.html
+                    trivy image --format table --severity CRITICAL,HIGH ${DOCKERHUB_CREDENTIALS_USR}/spring-petclinic:${BRANCH_NAME}-latest > docker_image_vulnerability.html
                     '''
                     archiveArtifacts artifacts: 'docker_image_vulnerability.html', followSymlinks: false
                 }
@@ -71,8 +71,8 @@ pipeline {
             steps {
                 script {
                         sh '''
-                        docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID}
-                        docker push ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
+                        docker push ${DOCKERHUB_CREDENTIALS_USR}/spring-petclinic:${BRANCH_NAME}-${COMMIT_ID}
+                        docker push ${DOCKERHUB_CREDENTIALS_USR}/spring-petclinic:${BRANCH_NAME}-latest
                         '''
                 }
             }
@@ -80,8 +80,8 @@ pipeline {
         stage('docker_clean_images') {
             steps {
                 sh '''
-                    docker rmi -f ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-${COMMIT_ID}
-                    docker rmi -f ${DOCKERHUB_CREDENTIALS_USR}/java-17-helloworld:${BRANCH_NAME}-latest
+                    docker rmi -f ${DOCKERHUB_CREDENTIALS_USR}/spring-petclinic:${BRANCH_NAME}-${COMMIT_ID}
+                    docker rmi -f ${DOCKERHUB_CREDENTIALS_USR}/spring-petclinic:${BRANCH_NAME}-latest
                 '''
             }
         }
