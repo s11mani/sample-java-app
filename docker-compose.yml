@@ -1,4 +1,4 @@
-## basic dependencies needed to run application..
+## basic dependencies needed to run application...
 ## command to setup:- docker-compose up -d..
 version: '3.8'
 services:
