@@ -4,7 +4,7 @@ containerport: 8080
 replicaCount: 2
 image:
   repository: "s11mani/"
-  tag: main-a4979dcd7fcdb28810e1238aff5a02355a6f5f54
+  tag: main-b5acfa29a01f88b8c1b74911a0ebebb71f4b9866
 service:
   port: 80
   nodeport: 30070
