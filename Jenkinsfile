@@ -3,6 +3,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS_PSW = credentials('dockerhub-password')
         DOCKERHUB_CREDENTIALS_USR = credentials('dockerhub-username')
+        GIT_TOKEN = credentials('git-token')
     }
     stages {
         stage('git_checkout') {
@@ -91,20 +92,20 @@ pipeline {
                 '''
             }
         }
-        // stage('argo_deploy') {
-        //     steps {
-        //         script {
-        //             sh '''
-        //             git config user.name "jenkins-bot"
-        //             git config user.email "jenkins@example.com"
-        //             '''
-        //             sh '''
-        //             git add helm/values.yaml
-        //             git commit -m "Update image tag to ${IMAGE_TAG}"
-        //             git push origin ${BRANCH}
-        //             '''
-        //         }
-        //     }
-        // }
+        stage('argo_deploy') {
+            steps {
+                script {
+                    sh '''
+                    git config user.name "jenkins-bot"
+                    git config user.email "jenkins@example.com"
+                    '''
+                    sh '''
+                    git add sample-java-app/${BRANCH_NAME}.yaml
+                    git commit -m "jenkins-bot update helm ${BRANCH_NAME}-${COMMIT_ID}"
+                    git push https://s11mani:${GIT_TOKEN}@github.com/s11mani/sample-java-app.git ${BRANCH_NAME}
+                    '''
+                }
+            }
+        }
     }
 }
