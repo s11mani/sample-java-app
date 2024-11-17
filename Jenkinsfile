@@ -100,7 +100,7 @@ pipeline {
                     git config user.email "jenkins@example.com"
                     '''
                     sh '''
-                    git add sample-java-app/${BRANCH_NAME}.yaml
+                    git add helm-charts/${BRANCH_NAME}.yaml
                     git commit -m "jenkins-bot update helm ${BRANCH_NAME}-${COMMIT_ID}"
                     git push https://s11mani:${GIT_TOKEN}@github.com/s11mani/sample-java-app.git ${BRANCH_NAME}
                     '''
