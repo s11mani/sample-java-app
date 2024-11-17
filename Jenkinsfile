@@ -98,6 +98,8 @@ pipeline {
                     sh '''
                     git config user.name "jenkins-bot"
                     git config user.email "jenkins@example.com"
+                    git add helm-charts/${BRANCH_NAME}.yaml
+                    git commit -m "jenkins-bot update helm ${BRANCH_NAME}-${COMMIT_ID}"
                     '''
                     def maxRetries = 5
                     def retries = 0
@@ -105,8 +107,6 @@ pipeline {
                     while (retries < maxRetries && !pushSuccess) {
                         try {
                             sh '''
-                            git add helm-charts/${BRANCH_NAME}.yaml
-                            git commit -m "jenkins-bot update helm ${BRANCH_NAME}-${COMMIT_ID}"
                             git push https://s11mani:${GIT_TOKEN}@github.com/s11mani/sample-java-app.git ${BRANCH_NAME}
                             '''
                             pushSuccess = true  // Break the loop if the push is successful
