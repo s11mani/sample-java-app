@@ -99,11 +99,30 @@ pipeline {
                     git config user.name "jenkins-bot"
                     git config user.email "jenkins@example.com"
                     '''
-                    sh '''
-                    git add helm-charts/${BRANCH_NAME}.yaml
-                    git commit -m "jenkins-bot update helm ${BRANCH_NAME}-${COMMIT_ID}"
-                    git push https://s11mani:${GIT_TOKEN}@github.com/s11mani/sample-java-app.git ${BRANCH_NAME}
-                    '''
+                    def maxRetries = 5
+                    def retries = 0
+                    def pushSuccess = false
+                    while (retries < maxRetries && !pushSuccess) {
+                        try {
+                            // Add, commit, and push the updated values.yaml
+                            sh '''
+                            git add helm-charts/${BRANCH_NAME}.yaml
+                            git commit -m "jenkins-bot update helm ${BRANCH_NAME}-${COMMIT_ID}"
+                            git push https://s11mani:${GIT_TOKEN}@github.com/s11mani/sample-java-app.git ${BRANCH_NAME}
+                            '''
+                            pushSuccess = true  // Break the loop if the push is successful
+                        } catch (Exception e) {
+                            retries++
+                            echo "Push failed, retrying... Attempt ${retries} of ${maxRetries}"
+                            // Fetch latest changes and try merging
+                            sh 'git fetch --all'
+                            try {
+                                sh 'git merge origin/${BRANCH_NAME} --strategy-option=theirs' // Resolve conflicts in favor of remote changes
+                            } catch (mergeError) {
+                                echo "Merge failed, retrying push after resolving conflict..."
+                            }
+                        }
+                    }    
                 }
             }
         }
