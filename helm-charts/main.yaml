@@ -1,5 +1,5 @@
 namespace: default
-deploymentname: java-17-helloworld
+deploymentname: spring-petclinic
 containerport: 8080
 replicaCount: 2
 image:
