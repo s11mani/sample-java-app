@@ -10,7 +10,7 @@ spec:
   selector:
     app: {{ .Values.deploymentname }}
   ports:
-    - port: 80
+    - nodePort: {{ .Values.nodeport }}
+      port: {{ .Values.serviceport }}
       targetPort: {{ .Values.containerport }}
-      nodePort: {{ .Values.nodeport }}
       protocol: TCP
