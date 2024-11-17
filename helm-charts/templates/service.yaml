@@ -6,13 +6,11 @@ metadata:
   labels:
     app: {{ .Values.deploymentname }}
 spec:
-  type: {{ .Values.servicetype }}
+  type: NodePort
   selector:
     app: {{ .Values.deploymentname }}
   ports:
     - port: {{ .Values.serviceport | int }}
       targetPort: {{ .Values.containerport | int }}
-      {{- if eq .Values.servicetype "NodePort" }}
       nodePort: {{ .Values.nodeport | int }}
-      {{- end }}
       protocol: TCP
